@@ -1,9 +1,9 @@
-#JVM Options
+# JVM Options
 
 > http://jvm-options.tech.xebia.fr/
 > http://www.oracle.com/technetwork/java/tuning-139912.html#section4.2.5
 
-####查看当前版本JDK的所有VM Options：java -XX:+PrintFlagsFinal
+#### 查看当前版本JDK的所有VM Options：java -XX:+PrintFlagsFinal
 	1. 以 ‘-’ 开头的是标准VM选项，VM规范的选项
 	2. 以 ‘-X’ 开头的都是非标准的（这些参数并不能保证在所有的JVM上都被实现），而且如果在新版本有什么改动也不会发布通知。
 	3. 以 ‘-XX’ 开头的都是不稳定的并且不推荐在生产环境中使用。这些参数的改动也不会发布通知。
