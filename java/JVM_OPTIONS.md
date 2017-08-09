@@ -1,6 +1,7 @@
 # JVM Options
 
 > http://jvm-options.tech.xebia.fr/
+
 > http://www.oracle.com/technetwork/java/tuning-139912.html#section4.2.5
 
 #### VM Options参数定义
@@ -15,6 +16,7 @@
 #### VM Options 参数详细介绍
 
 ##### 1. 类
+
 参数|默认值|描述
 ----|------|----
 -Xbootclasspath|						|指定加载不需要校验的类(跳过必要的类加载前的校验，能够减少加载时间，但是不安全)
@@ -23,6 +25,7 @@
 -XX:-RelaxAccessControlCheck|			|在Class校验器中，放松对访问控制的检查。作用与reflection里的setAccessible类似。(Java1.6引入)
 
 ##### 2. 编译/JIT   
+
 参数|默认值|描述
 ----|------|----                          
 -Xbatch|								|禁用后台编译(关闭后台代码编译,强制在前台编译,编译完成之后才能进行代码执行,默认情况下,jvm在后台进行编译，若没有编译完成,则前台运行代码时以解释模式运行)
@@ -42,7 +45,9 @@
 
 
 ##### 3. 堆
-> -Xms1024m -Xmx1024m -Xmn2g -XX:NewRatio=4 -XX:SurvivorRatio=4 -XX:PermSize=64m -XX:MaxPermSize=64m
+
+> -Xms1024m -Xmx1024m -Xmn2g -XX:NewRatio=4 -XX:SurvivorRatio=4 -XX:PermSize=64m -XX:MaxPermSize=64m 
+
 参数|默认值|描述
 ----|------|----
 -Xms| 									|堆初始值(物理内存的1/64(<1GB) 默认(MinHeapFreeRatio参数可以调整)空余堆内存小于40%时，JVM就会增大堆直到-Xmx的最大限制) 此值可以设置与-Xmx相同，以避免每次垃圾回收完成后JVM重新分配内存。
@@ -68,7 +73,9 @@
 
 
 ##### 4. 栈
+
 > -Xss128k -XX:ThreadStackSize=512
+
 参数|默认值|描述
 ----|------|----
 -Xss|									|设置线程堆栈空间大小。JDK5.0以后每个线程堆栈大小为1M，以前每个线程堆栈大小为256K。根据应用的线程所需内存大小进行调整。在相同物理内存下，减小这个值能生成更多的线程。但是操作系统对一个进程内的线程数还是有限制的，不能无限生成，经验值在3000~5000左右。
@@ -77,13 +84,16 @@
 
 
 ##### 5. 非堆
+
 > -XX:MaxDirectMemorySize=200m
+
 参数|默认值|描述
 ----|------|----
 -XX:MaxDirectMemorySize|200m    		|直接内存最大可用空间，设置不当可能导致系统OOM，NIO direct memory可申请的空间的上限就是-Xmx减去一个survivor space的预留大小。 当MaxDirectMemorySize参数没被显式设置时它的值就是-1。
 
 
 ##### 6. 字符串
+
 参数|默认值|描述
 ----|------|----
 -XX:+UseStringCache|					|缓存常用字符串。
@@ -92,6 +102,7 @@
 
 
 ##### 7. 线程
+
 参数|默认值|描述
 ----|------|----
 -XX:PreBlockSpin=10 -XX:+UseBoundThreads -XX:-UseSpinning -XX:+UseVMInterruptibleIO
@@ -102,6 +113,7 @@
 
 
 ##### 8. 垃圾收集器
+
 参数|默认值|描述
 ----|------|----
 -Xincgc|								|开启增量gc（默认为关闭）；这有助于减少长时间GC时应用程序出现的停顿；但由于可能和应用程序并发执行，所以会降低CPU对应用的处理能力。
@@ -140,7 +152,9 @@
 
 
 ##### 9. 垃圾收集信息/内存使用情况
+
 > com.sun.management.HotSpotDiagnosticMXBean API 和 jconsole 动态启用部分Print
+
 参数|默认值|描述
 ----|------|----
 -Xloggc:filename|						|把相关日志信息记录到文件以便分析(与上面几个配合使用)
@@ -170,6 +184,7 @@
 
 
 ##### 10. 类跟踪信息
+
 参数|默认值|描述
 ----|------|----
 -verbose|class    						|跟踪类的加载和卸载
@@ -182,13 +197,16 @@
 
 
 ##### 11. 系统参数查看
+
 > java -XX:+PrintFlagsFinal
+
 参数|默认值|描述
 ----|------|----
 -XX:+PrintFlagsFinal|					|打印所有JVM Options
 
 
 ##### 12. 虚拟机工作模式
+
 参数|默认值|描述
 ----|------|----
 -client|   								|默认工作模式
@@ -198,6 +216,7 @@
 
 
 ##### 13. 未分类
+
 参数|默认值|描述
 ----|------|----
 -Xcheck:jni|							|I函数进行附加check；此时jvm将校验传递给JNI函数参数的合法性，在本地代码中遇到非法数据时，jmv将报一个致命错误而终止；使用该参数后将造成性能下降，请慎用。
@@ -234,6 +253,7 @@
 
 
 ##### 14. Solaris
+
 参数|默认值|描述
 ----|------|----
 -XX:-AllowUserSignalHandlers|			|允许为java进程安装信号处理器
@@ -247,6 +267,7 @@
 -XX:+UseBoundThreads|					|绑定所有的用户线程到内核线程。 减少线程进入饥饿状态（得不到任何cpu time）的次数。
 
 ##### 15. 废弃
+
 参数|默认值|描述
 ----|------|----
 -XX:AltStackSize|16384					|备用信号堆栈大小（以字节为单位）
