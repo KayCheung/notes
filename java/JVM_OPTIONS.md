@@ -42,7 +42,7 @@
 
 
 ##### 3. 堆
-> -Xms1024m -Xmx1024m -Xmn2g -XX:NewRatio=4 -XX:SurvivorRatio=4 -XX:PermSize=64m -XX:MaxPermSize=64m
+> -Xms1024m -Xmx1024m -Xmn2g -XX:NewRatio=4 -XX:SurvivorRatio=4 -XX:PermSize=64m -XX:MaxPermSize=64m <
 参数|默认值|描述
 ----|------|----
 -Xms| 									|堆初始值(物理内存的1/64(<1GB) 默认(MinHeapFreeRatio参数可以调整)空余堆内存小于40%时，JVM就会增大堆直到-Xmx的最大限制) 此值可以设置与-Xmx相同，以避免每次垃圾回收完成后JVM重新分配内存。
