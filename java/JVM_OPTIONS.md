@@ -274,44 +274,43 @@
 -XX:AltStackSize|16384					|备用信号堆栈大小（以字节为单位）
 
 
-==============================================
 
-* -XX:-UseSpinning
-<p>
-自旋锁优化原理
-      大家知道，Java的多线程安全是基于Lock机制实现的，而Lock的性能往往不如人意。原因是，monitorenter与monitorexit这两个控制多线程同步的bytecode原语，
+#### 补充
+
+##### -XX:-UseSpinning
+
+* 自旋锁优化原理 <br />
+	大家知道，Java的多线程安全是基于Lock机制实现的，而Lock的性能往往不如人意。原因是，monitorenter与monitorexit这两个控制多线程同步的bytecode原语，
 是JVM依赖操作系统互斥(mutex)来实现的。互斥是一种会导致线程挂起，并在较短的时间内又必须重新调度回原线程的，较为消耗资源的操作。为了避免进入OS互斥，
 Java6的开发者们提出了自旋锁优化。自旋锁优化的原理是在线程进入OS互斥前，通过CAS自旋一定的次数来检测锁的释放。如果在自旋次数未达到预设值前锁已被释放，
 则当前线程会立即持有该锁。
- 关联选项：
-   -XX:PreBlockSpin=10
-</p>
+关联选项：
+	-XX:PreBlockSpin=10
 
 
+##### -XX:+HandlePromotionFailure
 
-* -XX:+HandlePromotionFailure
-
-什么是新生代收集担保？
+* 什么是新生代收集担保？<br />
 在一次理想化的minor gc中，Eden和First Survivor中的活跃对象会被复制到Second Survivor。然而，Second Survivor不一定能容纳下所有从E和F区copy过来的活
 跃对象。为了确保minor gc能够顺利完成，GC需要在年老代中额外保留一块足以容纳所有活跃对象的内存空间。这个预留操作，就被称之为新生代收集担保
-（New Generation Guarantee）。如果预留操作无法完成时，仍会触发major gc(full gc)。
-为什么要关闭新生代收集担保？
+（New Generation Guarantee）。如果预留操作无法完成时，仍会触发major gc(full gc)。<br />
+* 为什么要关闭新生代收集担保？<br />
 因为在年老代中预留的空间大小，是无法精确计算的。为了确保极端情况的发生，GC参考了最坏情况下的新生代内存占用，即Eden+First Survivor。这种策略无疑是在
 浪费年老代内存，从时序角度看，还会提前触发Full GC。为了避免如上情况的发生，JVM允许开发者手动关闭新生代收集担保。在开启本选项后，minor gc将不再提供新
 生代收集担保，而是在出现survior或年老代不够用时，抛出promotion failed异常。
 
-* -XX:MaxHeapFreeRatio=70
-什么是预估上限值？
+##### -XX:MaxHeapFreeRatio=70
+
+* 什么是预估上限值？<br />
 JVM在启动时，会申请最大值（-Xmx指定的数值）的地址空间，但其中绝大部分空间不会被立即分配(virtual)。它们会一直保留着，直到运行过程中，JVM发现实际占用接
 近已分配上限值时，才从virtual里再分配掉一部分内存。这里提到的已分配上限值，也可以叫做预估上限值。引入预估上限值的好处是，可以有效地控制堆的大小。堆越小，
 GC效率越高嘛。注意：预估上限值的大小一定小于或等于最大值。
 
-* -XX:HeapDumpPath=./java_pid<pid>.hprof
+##### -XX:HeapDumpPath=./java_pid<pid>.hprof
 
-什么是堆内存快照？
+* 什么是堆内存快照？<br />
 当java进程因OOM或crash被OS强制终止后，会生成一个hprof（Heap PROFling）格式的堆内存快照文件。该文件用于线下调试，诊断，查找问题。
 文件名一般为 java_<pid>_<date>_<time>_heapDump.hprof 解析快照文件，可以使用 jhat, eclipse MAT，gdb等工具。
-
 
 
 
