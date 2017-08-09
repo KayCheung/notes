@@ -39,7 +39,7 @@
 -XX:MaxInlineSize|35					|内联方法的最大字节数。
 -XX:FreqInlineSize|n					|内联频繁执行的方法的最大字节码大小。
 -XX:AllocatePrefetchStyle|1				|预读取指令的生成代码风格  0-无预读取指令生成   1-在每次分配后执行预读取命令   2-当预读取指令执行后使用TLAB()分配水印指针来找回入口
--XX:-UseFastAccessorMethods				|优化原始类型的getter方法性能。
+-XX:-UseFastAccessorMethods|			|优化原始类型的getter方法性能。
 -XX:LoopUnrollLimit|n					|代表节点数目小于给定值时打开循环体。
 -XX:+UseLoopPredicate|					|编译器对循环的优化
 
@@ -103,9 +103,10 @@
 
 ##### 7. 线程
 
+> -XX:PreBlockSpin=10 -XX:+UseBoundThreads -XX:-UseSpinning -XX:+UseVMInterruptibleIO
+
 参数|默认值|描述
 ----|------|----
--XX:PreBlockSpin=10 -XX:+UseBoundThreads -XX:-UseSpinning -XX:+UseVMInterruptibleIO
 -XX:PreBlockSpin| 						|控制多线程自旋锁优化的自旋次数。 前置选项：-XX:+UseSpinning
 -XX:+UseSpinning|						|启用多线程自旋锁优化。(Java1.4.2和1.5需要手动启用,Java1.6默认已启用)
 -XX:+UseThreadPriorities|				|使用本地线程的优先级
@@ -230,7 +231,7 @@
 -cp|									|和 zip/jar 文件的类搜索路径
 -classpath|								|和 zip/jar 文件的类搜索路径（用  ':' 分隔的目录、JAR档案和 ZIP档案列表，用于搜索类文件, 例如：/spring-beans-4.3.3.RELEASE.jar:/spring-context-4.3.3.RELEASE.jar:/spring-context-support-4.2.8.RELEASE.jar:/spring-core-4.3.3.RELEASE.jar:）
 -D<名称>|<值>							|系统属性(例如：-Ddisconf.conf_server_host=10.10.1.1:8101)
--verbose|[class|gc|jni]					|详细输出
+-verbose|[class or gc or jni]			|详细输出
 -version|								|jdk版本
 -version|<值>							|Deprecated
 -showversion|							|产品版本并继续
@@ -275,36 +276,37 @@
 
 ==============================================
 
--XX:-UseSpinning
-
+* -XX:-UseSpinning
+<p>
 自旋锁优化原理
-大家知道，Java的多线程安全是基于Lock机制实现的，而Lock的性能往往不如人意。原因是，monitorenter与monitorexit这两个控制多线程同步的bytecode原语，
+      大家知道，Java的多线程安全是基于Lock机制实现的，而Lock的性能往往不如人意。原因是，monitorenter与monitorexit这两个控制多线程同步的bytecode原语，
 是JVM依赖操作系统互斥(mutex)来实现的。互斥是一种会导致线程挂起，并在较短的时间内又必须重新调度回原线程的，较为消耗资源的操作。为了避免进入OS互斥，
-Java6的开发者们提出了自旋锁优化。
- 自旋锁优化的原理是在线程进入OS互斥前，通过CAS自旋一定的次数来检测锁的释放。如果在自旋次数未达到预设值前锁已被释放，则当前线程会立即持有该锁。
+Java6的开发者们提出了自旋锁优化。自旋锁优化的原理是在线程进入OS互斥前，通过CAS自旋一定的次数来检测锁的释放。如果在自旋次数未达到预设值前锁已被释放，
+则当前线程会立即持有该锁。
  关联选项：
--XX:PreBlockSpin=10
+   -XX:PreBlockSpin=10
+</p>
 
 
 
--XX:+HandlePromotionFailure
+* -XX:+HandlePromotionFailure
 
 什么是新生代收集担保？
-在一次理想化的minor gc中，Eden和First Survivor中的活跃对象会被复制到Second Survivor。然而，Second Survivor不一定能容纳下所有从E和F区copy过来的活跃对象。
-为了确保minor gc能够顺利完成，GC需要在年老代中额外保留一块足以容纳所有活跃对象的内存空间。这个预留操作，就被称之为新生代收集担保（New Generation Guarantee）。
-如果预留操作无法完成时，仍会触发major gc(full gc)。
+在一次理想化的minor gc中，Eden和First Survivor中的活跃对象会被复制到Second Survivor。然而，Second Survivor不一定能容纳下所有从E和F区copy过来的活
+跃对象。为了确保minor gc能够顺利完成，GC需要在年老代中额外保留一块足以容纳所有活跃对象的内存空间。这个预留操作，就被称之为新生代收集担保
+（New Generation Guarantee）。如果预留操作无法完成时，仍会触发major gc(full gc)。
 为什么要关闭新生代收集担保？
-因为在年老代中预留的空间大小，是无法精确计算的。为了确保极端情况的发生，GC参考了最坏情况下的新生代内存占用，即Eden+First Survivor。这种策略无疑是在浪费年老代内存，
-从时序角度看，还会提前触发Full GC。为了避免如上情况的发生，JVM允许开发者手动关闭新生代收集担保。在开启本选项后，minor gc将不再提供新生代收集担保，
-而是在出现survior或年老代不够用时，抛出promotion failed异常。
+因为在年老代中预留的空间大小，是无法精确计算的。为了确保极端情况的发生，GC参考了最坏情况下的新生代内存占用，即Eden+First Survivor。这种策略无疑是在
+浪费年老代内存，从时序角度看，还会提前触发Full GC。为了避免如上情况的发生，JVM允许开发者手动关闭新生代收集担保。在开启本选项后，minor gc将不再提供新
+生代收集担保，而是在出现survior或年老代不够用时，抛出promotion failed异常。
 
--XX:MaxHeapFreeRatio=70
+* -XX:MaxHeapFreeRatio=70
 什么是预估上限值？
-JVM在启动时，会申请最大值（-Xmx指定的数值）的地址空间，但其中绝大部分空间不会被立即分配(virtual)。它们会一直保留着，直到运行过程中，JVM发现实际占用接近已分配上限值时，
-才从virtual里再分配掉一部分内存。这里提到的已分配上限值，也可以叫做预估上限值。
-引入预估上限值的好处是，可以有效地控制堆的大小。堆越小，GC效率越高嘛。注意：预估上限值的大小一定小于或等于最大值。
+JVM在启动时，会申请最大值（-Xmx指定的数值）的地址空间，但其中绝大部分空间不会被立即分配(virtual)。它们会一直保留着，直到运行过程中，JVM发现实际占用接
+近已分配上限值时，才从virtual里再分配掉一部分内存。这里提到的已分配上限值，也可以叫做预估上限值。引入预估上限值的好处是，可以有效地控制堆的大小。堆越小，
+GC效率越高嘛。注意：预估上限值的大小一定小于或等于最大值。
 
--XX:HeapDumpPath=./java_pid<pid>.hprof
+* -XX:HeapDumpPath=./java_pid<pid>.hprof
 
 什么是堆内存快照？
 当java进程因OOM或crash被OS强制终止后，会生成一个hprof（Heap PROFling）格式的堆内存快照文件。该文件用于线下调试，诊断，查找问题。
