@@ -42,6 +42,12 @@
 -XX:-UseFastAccessorMethods|			|优化原始类型的getter方法性能。
 -XX:LoopUnrollLimit|n					|代表节点数目小于给定值时打开循环体。
 -XX:+UseLoopPredicate|					|编译器对循环的优化
+-XX:+DoEscapeAnalysis| 					|开启逃逸分析( 进行逃逸分析之后，产生的后果是所有的对象都将由栈上分配，而非从JVM内存模型中的堆来分配)
+-XX:+PrintEscapeAnalysis| 				|开启逃逸分析后，可通过此参数查看分析结果
+-XX:+EliminateAllocations| 				|开启标量替换(矢量替代。逃逸分析方法如果发现对象的内存存储结构不需要连续进行的话，就可以将对象的部分甚至全部都保存在CPU寄存器内，这样能大大提高访问速度)
+-XX:+PrintEliminateAllocations| 		|开启标量替换后，查看标量替换情况
+-XX:+EliminateLocks| 					|开启同步消除(消除同步。线程同步的代价是相当高的，同步的后果是降低并发性和性能。逃逸分析可以判断出某个对象是否始终只被一个线程访问，如果只被一个线程访问，那么对该对象的同步操作就可以转化成没有同步保护的操作，这样就能大大提高并发程度和性能。)
+
 
 
 ##### 3. 堆
