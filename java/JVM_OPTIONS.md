@@ -111,6 +111,7 @@
 -XX:+UseSpinning|						|启用多线程自旋锁优化。(Java1.4.2和1.5需要手动启用,Java1.6默认已启用)
 -XX:+UseThreadPriorities|				|使用本地线程的优先级
 -XX:+UseBiasedLocking|					|启用偏向锁。
+-XX:BiasedLockingStartupDelay|4000		|关闭偏向锁延迟（如果偏向锁开启，默认会有延迟启动偏向锁, 0 为不延迟）
 
 
 ##### 8. 垃圾收集器
