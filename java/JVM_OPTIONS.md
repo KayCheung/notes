@@ -14,7 +14,10 @@
 	5. 数字型参数选项通过-XX:=设定。数字可以是 m/M(兆字节)，k/K(千字节)，g/G(G字节)。比如：32K表示32768字节。（比如-XX:MaxPermSize=64m）
 	6. String参数选项通过-XX:=设定，通常用来指定一个文件，路径，或者一个命令列表。（比如-XX:HeapDumpPath=./java_pid.hprof）
 	7. 命令 java -help可以列出java 应用启动时标准选项（见附录标准VM参数表，不同的JVM实现是不同的）。java -X可以列出不标准的参数（这是JVM的扩展特性）。-X相关的选项不是标准的，被改变也不会通知。如果你想查看当前应用使用的JVM参数，你可以使用：ManagementFactory.getRuntimeMXBean().getInputArguments()。
-
+	8. VM 参数可分为三类
+		行为参数（Behavioral Options）：用于改变jvm的一些基础行为
+		性能调优（Performance Tuning）：用于jvm的性能调优
+		调试参数（Debugging Options）：一般用于打开跟踪、打印、输出等jvm参数，用于显示jvm更加详细的信息
 #### VM Options 参数详细介绍
 
 ##### 1. 类
