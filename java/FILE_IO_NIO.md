@@ -3,11 +3,13 @@
 > FileInputStream.c
 
 <pre><code>
+<font color="read">//<i>单字节读取</i></font>
 JNIEXPORT jint JNICALL
 Java_java_io_FileInputStream_read(JNIEnv *env, jobject this) {
     return readSingle(env, this, fis_fd);
 }
 
+<font color="read">//<i>读取字节数组</i></font>
 JNIEXPORT jint JNICALL
 Java_java_io_FileInputStream_readBytes(JNIEnv *env, jobject this,
         jbyteArray bytes, jint off, jint len) {
@@ -17,12 +19,14 @@ Java_java_io_FileInputStream_readBytes(JNIEnv *env, jobject this,
 
 > FileOutputStream_md.c
 
+<font color="read">//<i>写单字节</i></font>
 <pre><code>
 JNIEXPORT void JNICALL
 Java_java_io_FileOutputStream_write(JNIEnv *env, jobject this, jint byte, jboolean append) {
     writeSingle(env, this, byte, append, fos_fd);
 }
 
+<font color="read">//<i>写字节数组</i></font>
 JNIEXPORT void JNICALL
 Java_java_io_FileOutputStream_writeBytes(JNIEnv *env,
     jobject this, jbyteArray bytes, jint off, jint len, jboolean append)
@@ -33,77 +37,79 @@ Java_java_io_FileOutputStream_writeBytes(JNIEnv *env,
 
 > io_util.c
 
+<font color="read">//<i>单字节读取</i></font>
 <pre><code>
 jint
 readSingle(JNIEnv *env, jobject this, jfieldID fid) {
     jint nread;
-    char ret;
-    FD fd = GET_FD(this, fid);
+    char ret; <font color="read">//<i>定义一个变量,接收读取到的数据</i></font>
+    FD fd = GET_FD(this, fid); <font color="read">//<i>获取文件句柄</i></font>
     if (fd == -1) {
         JNU_ThrowIOException(env, "Stream Closed");
         return -1;
     }
-    nread = IO_Read(fd, &ret, 1);
+    nread = IO_Read(fd, &ret, 1);<font color="read">//<i>调用系统接口</i></font>
     if (nread == 0) { /* EOF */
         return -1;
     } else if (nread == -1) { /* error */
         JNU_ThrowIOExceptionWithLastError(env, "Read error");
     }
-    return ret & 0xFF;
+    return ret & 0xFF;<font color="read">//<i>转int,高24位取0, 后8位保持原样</i></font>
 }
+
+<font color="read">//<i>读取字节数组</i></font>
+
+<font color="read">//<i>Block IO默认非单字节读写为8KB, 操作系统默认的数据块大小一般在4KB</i></font>
+<code>#define BUF_SIZE 8192</code>
 
 jint
 readBytes(JNIEnv *env, jobject this, jbyteArray bytes,
           jint off, jint len, jfieldID fid)
 {
     jint nread;
-    char stackBuf[BUF_SIZE];
-    char *buf = NULL;
+    char stackBuf[BUF_SIZE];<font color="read">//<i>定义一个固定长度的缓冲区,栈上分配</i></font>
+    char *buf = NULL;<font color="read">//<i>定义空的缓冲区,待分配空间</i></font>
     FD fd;
-
     if (IS_NULL(bytes)) {
         JNU_ThrowNullPointerException(env, NULL);
         return -1;
     }
-
     if (outOfBounds(env, off, len, bytes)) {
         JNU_ThrowByName(env, "java/lang/IndexOutOfBoundsException", NULL);
         return -1;
     }
-
     if (len == 0) {
         return 0;
-    } else if (len > BUF_SIZE) {
-        buf = malloc(len);
+    } else if (len > BUF_SIZE) {<font color="read">//<i>如果读取的内容大于默认的BUF_SIZE,则在内存中开辟一块len长度的空间</i></font>
+        buf = malloc(len);<font color="read">//<i>在内存中开辟一块len长度的空间,内存空间不够返回NULL,最后需要配合free进行内存回收</i></font>
         if (buf == NULL) {
             JNU_ThrowOutOfMemoryError(env, NULL);
             return 0;
         }
     } else {
-        buf = stackBuf;
+        buf = stackBuf;<font color="read">//<i>如果len小于默认的缓冲大小,则直接使用默认的缓冲区</i></font>
     }
-
-    fd = GET_FD(this, fid);
+    fd = GET_FD(this, fid);<font color="read">//<i>获取文件句柄</i></font>
     if (fd == -1) {
         JNU_ThrowIOException(env, "Stream Closed");
         nread = -1;
     } else {
-        nread = IO_Read(fd, buf, len);
+        nread = IO_Read(fd, buf, len);<font color="read">//<i>调用系统接口</i></font>
         if (nread > 0) {
-            (*env)->SetByteArrayRegion(env, bytes, off, nread, (jbyte *)buf);
+            (*env)->SetByteArrayRegion(env, bytes, off, nread, (jbyte *)buf);<font color="read">//<i>将buff中的数据拷贝到bytes中</i></font>
         } else if (nread == -1) {
             JNU_ThrowIOExceptionWithLastError(env, "Read error");
         } else { /* EOF */
             nread = -1;
         }
     }
-
     if (buf != stackBuf) {
-        free(buf);
+        free(buf);<font color="read">//<i>释放buf</i></font>
     }
     return nread;
 }
 
+<font color="read">//<i>写单字节</i></font>
 void
 writeSingle(JNIEnv *env, jobject this, jint byte, jboolean append, jfieldID fid) {
     // Discard the 24 high-order bits of byte. See OutputStream#write(int)
@@ -124,6 +130,7 @@ writeSingle(JNIEnv *env, jobject this, jint byte, jboolean append, jfieldID fid)
     }
 }
 
+<font color="read">//<i>写字节数组</i></font>
 void
 writeBytes(JNIEnv *env, jobject this, jbyteArray bytes,
            jint off, jint len, jboolean append, jfieldID fid)
@@ -132,17 +139,14 @@ writeBytes(JNIEnv *env, jobject this, jbyteArray bytes,
     char stackBuf[BUF_SIZE];
     char *buf = NULL;
     FD fd;
-
     if (IS_NULL(bytes)) {
         JNU_ThrowNullPointerException(env, NULL);
         return;
     }
-
     if (outOfBounds(env, off, len, bytes)) {
         JNU_ThrowByName(env, "java/lang/IndexOutOfBoundsException", NULL);
         return;
     }
-
     if (len == 0) {
         return;
     } else if (len > BUF_SIZE) {
@@ -154,7 +158,6 @@ writeBytes(JNIEnv *env, jobject this, jbyteArray bytes,
     } else {
         buf = stackBuf;
     }
-
     (*env)->GetByteArrayRegion(env, bytes, off, len, (jbyte *)buf);
 
     if (!(*env)->ExceptionOccurred(env)) {
@@ -266,8 +269,8 @@ handleWrite(FD fd, const void *buf, jint len)
 }
 </code></pre>
 
-
-
+---
+ 
 # NIO
 
 两种方式读取文件内容，且两种都是以DirectByteBuffer来获取内容
@@ -278,66 +281,193 @@ handleWrite(FD fd, const void *buf, jint len)
 > FileChannelImpl.java
 
 <pre><code>
-public int read(ByteBuffer arg0) throws IOException {
-   ......
-   if(this.isOpen()) {
-      do {
-         arg2 = IOUtil.read(this.fd, arg0, -1L, this.nd);
-      } while(arg2 == -3 && this.isOpen());
+public int read(ByteBuffer dst) throws IOException {
+    ......
+    synchronized (positionLock) {
+        .......
+        if (!isOpen())
+            return 0;
+        do {
+            n = IOUtil.read(fd, dst, -1, nd);
+        } while ((n == IOStatus.INTERRUPTED) && isOpen());
+        return IOStatus.normalize(n);
+        ......
+    }
+    ......
+}
 
-      int arg11 = IOStatus.normalize(arg2);
-      return arg11;
-   }
-   ......
+public int write(ByteBuffer src) throws IOException {
+    ......
+    synchronized (positionLock) {
+        ......
+        if (!isOpen())
+            return 0;
+        do {
+            n = IOUtil.write(fd, src, -1, nd);
+        } while ((n == IOStatus.INTERRUPTED) && isOpen());
+        return IOStatus.normalize(n);
+        ......
+    }
+}
 
+public MappedByteBuffer map(MapMode mode, long position, long size)
+        throws IOException
+{
+    ......
+	do {
+		rv = nd.truncate(fd, position + size);
+	} while ((rv == IOStatus.INTERRUPTED) && isOpen());
+    ......
+	......
+	try {
+		// If no exception was thrown from map0, the address is valid
+		addr = map0(imode, mapPosition, mapSize);
+	} catch (OutOfMemoryError x) {
+		// An OutOfMemoryError may indicate that we've exhausted memory
+		// so force gc and re-attempt map
+		System.gc();
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException y) {
+			Thread.currentThread().interrupt();
+		}
+		try {
+			addr = map0(imode, mapPosition, mapSize);
+		} catch (OutOfMemoryError y) {
+			// After a second OOME, fail
+			throw new IOException("Map failed", y);
+		}
+	}
+	......
+	......
+	Unmapper um = new Unmapper(addr, mapSize, isize, mfd);
+	if ((!writable) || (imode == MAP_RO)) {
+		return Util.newMappedByteBufferR(isize,
+										 addr + pagePosition,
+										 mfd,
+										 um);
+	} else {
+		return Util.newMappedByteBuffer(isize,
+										addr + pagePosition,
+										mfd,
+										um);
+	}
+	......
+}
+
+private static class Unmapper
+        implements Runnable
+{
+    ......
+	public void run() {
+		if (address == 0)
+			return;
+		unmap0(address, size);
+		address = 0;
+		// if this mapping has a valid file descriptor then we close it
+		if (fd.valid()) {
+			try {
+				nd.close(fd);
+			} catch (IOException ignore) {
+				// nothing we can do
+			}
+		}
+		synchronized (Unmapper.class) {
+			count--;
+			totalSize -= size;
+			totalCapacity -= cap;
+		}
+	}
 }
 </code></pre>
 
 > IOUtil.java
 
 <pre><code>
-static int read(FileDescriptor arg, ByteBuffer arg0, long arg1, NativeDispatcher arg3) throws IOException {
-  if(arg0.isReadOnly()) {
-     throw new IllegalArgumentException("Read-only buffer");
-  } else if(arg0 instanceof DirectBuffer) {
-     return readIntoNativeBuffer(arg, arg0, arg1, arg3);
-  } else {
-     ByteBuffer arg4 = Util.getTemporaryDirectBuffer(arg0.remaining());
-     int arg6;
-     try {
-        int arg5 = readIntoNativeBuffer(arg, arg4, arg1, arg3);
-        arg4.flip();
-        if(arg5 > 0) {
-           arg0.put(arg4);
-        }
-        arg6 = arg5;
-     } finally {
-        Util.offerFirstTemporaryDirectBuffer(arg4);
-     }
-     return arg6;
-  }
+static int read(FileDescriptor fd, ByteBuffer dst, long position,  NativeDispatcher nd) throws IOException
+{
+    if (dst.isReadOnly())
+        throw new IllegalArgumentException("Read-only buffer");
+    if (dst instanceof DirectBuffer)
+        return readIntoNativeBuffer(fd, dst, position, nd);
+    // Substitute a native buffer
+    ByteBuffer bb = Util.getTemporaryDirectBuffer(dst.remaining());
+    try {
+        int n = readIntoNativeBuffer(fd, bb, position, nd);
+        bb.flip();
+        if (n > 0)
+            dst.put(bb);
+        return n;
+    } finally {
+        Util.offerFirstTemporaryDirectBuffer(bb);
+    }
 }
 
-private static int readIntoNativeBuffer(FileDescriptor arg, ByteBuffer arg0, long arg1, NativeDispatcher arg3) throws IOException {
-    int arg4 = arg0.position();
-    int arg5 = arg0.limit();
-    assert arg4 <= arg5;
-    int arg6 = arg4 <= arg5?arg5 - arg4:0;
-    if(arg6 == 0) {
+private static int readIntoNativeBuffer(FileDescriptor fd, ByteBuffer bb, long position, NativeDispatcher nd) throws IOException
+{
+    int pos = bb.position();
+    int lim = bb.limit();
+    assert (pos <= lim);
+    int rem = (pos <= lim ? lim - pos : 0);
+    if (rem == 0)
         return 0;
+    int n = 0;
+    if (position != -1) {
+        n = nd.pread(fd, ((DirectBuffer)bb).address() + pos,
+                     rem, position);
     } else {
-        boolean arg7 = false;
-        int arg8;
-        if(arg1 != -1L) {
-            arg8 = arg3.pread(arg, ((DirectBuffer)arg0).address() + (long)arg4, arg6, arg1);
-        } else {
-            arg8 = arg3.read(arg, ((DirectBuffer)arg0).address() + (long)arg4, arg6);
-        }
-        if(arg8 > 0) {
-            arg0.position(arg4 + arg8);
-        }
-        return arg8;
+        n = nd.read(fd, ((DirectBuffer)bb).address() + pos, rem);
     }
+    if (n > 0)
+        bb.position(pos + n);
+    return n;
+}
+
+static int write(FileDescriptor fd, ByteBuffer src, long position, NativeDispatcher nd) throws IOException
+{
+    if (src instanceof DirectBuffer)
+        return writeFromNativeBuffer(fd, src, position, nd);
+    // Substitute a native buffer
+    int pos = src.position();
+    int lim = src.limit();
+    assert (pos <= lim);
+    int rem = (pos <= lim ? lim - pos : 0);
+    ByteBuffer bb = Util.getTemporaryDirectBuffer(rem);
+    try {
+        bb.put(src);
+        bb.flip();
+        // Do not update src until we see how many bytes were written
+        src.position(pos);
+        int n = writeFromNativeBuffer(fd, bb, position, nd);
+        if (n > 0) {
+            // now update src
+            src.position(pos + n);
+        }
+        return n;
+    } finally {
+        Util.offerFirstTemporaryDirectBuffer(bb);
+    }
+}
+
+private static int writeFromNativeBuffer(FileDescriptor fd, ByteBuffer bb, long position, NativeDispatcher nd) throws IOException
+{
+    int pos = bb.position();
+    int lim = bb.limit();
+    assert (pos <= lim);
+    int rem = (pos <= lim ? lim - pos : 0);
+    int written = 0;
+    if (rem == 0)
+        return 0;
+    if (position != -1) {
+        written = nd.pwrite(fd,
+                            ((DirectBuffer)bb).address() + pos,
+                            rem, position);
+    } else {
+        written = nd.write(fd, ((DirectBuffer)bb).address() + pos, rem);
+    }
+    if (written > 0)
+        bb.position(pos + written);
+    return written;
 }
 </code></pre>
 
@@ -347,7 +477,77 @@ private static int readIntoNativeBuffer(FileDescriptor arg, ByteBuffer arg0, lon
 public byte get() {
     return ((unsafe.getByte(ix(nextGetIndex()))));
 }
+
+public ByteBuffer put(byte x) {
+    unsafe.putByte(ix(nextPutIndex()), ((x)));
+    return this;
+}
+
+private static class Deallocator
+        implements Runnable
+    {
+    public void run() {
+        if (address == 0) {
+            // Paranoia
+            return;
+        }
+        unsafe.freeMemory(address);
+        address = 0;
+        Bits.unreserveMemory(size, capacity);
+    }
+}
 </code></pre>
+
+> unsafe.cpp
+
+<pre><code>
+inline void* addr_from_java(jlong addr) {
+  // This assert fails in a variety of ways on 32-bit systems.
+  // It is impossible to predict whether native code that converts
+  // pointers to longs will sign-extend or zero-extend the addresses.
+  //assert(addr == (uintptr_t)addr, "must not be odd high bits");
+  return (void*)(uintptr_t)addr;
+}
+
+inline jlong addr_to_java(void* p) {
+  assert(p == (void*)(uintptr_t)p, "must not be odd high bits");
+  return (uintptr_t)p;
+}
+
+#define DEFINE_GETSETNATIVE(java_type, Type, native_type) \
+ \
+UNSAFE_ENTRY(java_type, Unsafe_GetNative##Type(JNIEnv *env, jobject unsafe, jlong addr)) \
+  UnsafeWrapper("Unsafe_GetNative"#Type); \
+  void* p = addr_from_java(addr); \
+  JavaThread* t = JavaThread::current(); \
+  t->set_doing_unsafe_access(true); \
+  java_type x = *(volatile native_type*)p; \
+  t->set_doing_unsafe_access(false); \
+  return x; \
+UNSAFE_END \
+ \
+UNSAFE_ENTRY(void, Unsafe_SetNative##Type(JNIEnv *env, jobject unsafe, jlong addr, java_type x)) \
+  UnsafeWrapper("Unsafe_SetNative"#Type); \
+  JavaThread* t = JavaThread::current(); \
+  t->set_doing_unsafe_access(true); \
+  void* p = addr_from_java(addr); \
+  *(volatile native_type*)p = x; \
+  t->set_doing_unsafe_access(false); \
+UNSAFE_END \
+ \
+// END DEFINE_GETSETNATIVE.
+
+DEFINE_GETSETNATIVE(jbyte, Byte, signed char)
+DEFINE_GETSETNATIVE(jshort, Short, signed short);
+DEFINE_GETSETNATIVE(jchar, Char, unsigned short);
+DEFINE_GETSETNATIVE(jint, Int, jint);
+// no long -- handled specially
+DEFINE_GETSETNATIVE(jfloat, Float, float);
+DEFINE_GETSETNATIVE(jdouble, Double, double);
+
+#undef DEFINE_GETSETNATIVE
+</code></pre>
+
 
 
 > FileDispatcherImpl.c
@@ -438,6 +638,136 @@ Java_sun_nio_ch_FileDispatcherImpl_write0(JNIEnv *env, jclass clazz,
     void *buf = (void *)jlong_to_ptr(address);
 
     return convertReturnVal(env, write(fd, buf, len), JNI_FALSE);
+}
+</code></pre>
+
+> FileChannelImpl.c
+
+## windows
+<pre>code>
+JNIEXPORT jlong JNICALL
+Java_sun_nio_ch_FileChannelImpl_map0(JNIEnv *env, jobject this,
+                               jint prot, jlong off, jlong len)
+{
+    void *mapAddress = 0;
+    jint lowOffset = (jint)off;
+    jint highOffset = (jint)(off >> 32);
+    jlong maxSize = off + len;
+    jint lowLen = (jint)(maxSize);
+    jint highLen = (jint)(maxSize >> 32);
+    jobject fdo = (*env)->GetObjectField(env, this, chan_fd);
+    HANDLE fileHandle = (HANDLE)(handleval(env, fdo));
+    HANDLE mapping;
+    DWORD mapAccess = FILE_MAP_READ;
+    DWORD fileProtect = PAGE_READONLY;
+    DWORD mapError;
+    BOOL result;
+    if (prot == sun_nio_ch_FileChannelImpl_MAP_RO) {
+        fileProtect = PAGE_READONLY;
+        mapAccess = FILE_MAP_READ;
+    } else if (prot == sun_nio_ch_FileChannelImpl_MAP_RW) {
+        fileProtect = PAGE_READWRITE;
+        mapAccess = FILE_MAP_WRITE;
+    } else if (prot == sun_nio_ch_FileChannelImpl_MAP_PV) {
+        fileProtect = PAGE_WRITECOPY;
+        mapAccess = FILE_MAP_COPY;
+    }
+    mapping = CreateFileMapping(
+        fileHandle,      /* Handle of file */
+        NULL,            /* Not inheritable */
+        fileProtect,     /* Read and write */
+        highLen,         /* High word of max size */
+        lowLen,          /* Low word of max size */
+        NULL);           /* No name for object */
+    if (mapping == NULL) {
+        JNU_ThrowIOExceptionWithLastError(env, "Map failed");
+        return IOS_THROWN;
+    }
+    mapAddress = MapViewOfFile(
+        mapping,             /* Handle of file mapping object */
+        mapAccess,           /* Read and write access */
+        highOffset,          /* High word of offset */
+        lowOffset,           /* Low word of offset */
+        (DWORD)len);         /* Number of bytes to map */
+    mapError = GetLastError();
+    result = CloseHandle(mapping);
+    if (result == 0) {
+        JNU_ThrowIOExceptionWithLastError(env, "Map failed");
+        return IOS_THROWN;
+    }
+    if (mapAddress == NULL) {
+        if (mapError == ERROR_NOT_ENOUGH_MEMORY)
+            JNU_ThrowOutOfMemoryError(env, "Map failed");
+        else
+            JNU_ThrowIOExceptionWithLastError(env, "Map failed");
+        return IOS_THROWN;
+    }
+    return ptr_to_jlong(mapAddress);
+}
+
+JNIEXPORT jint JNICALL
+Java_sun_nio_ch_FileChannelImpl_unmap0(JNIEnv *env, jobject this,
+                                 jlong address, jlong len)
+{
+    BOOL result;
+    void *a = (void *) jlong_to_ptr(address);
+    result = UnmapViewOfFile(a);
+    if (result == 0) {
+        JNU_ThrowIOExceptionWithLastError(env, "Unmap failed");
+        return IOS_THROWN;
+    }
+    return 0;
+}
+</code></pre>
+
+
+## Linux
+<pre><code>
+JNIEXPORT jlong JNICALL
+Java_sun_nio_ch_FileChannelImpl_map0(JNIEnv *env, jobject this,
+                                     jint prot, jlong off, jlong len)
+{
+    void *mapAddress = 0;
+    jobject fdo = (*env)->GetObjectField(env, this, chan_fd);
+    jint fd = fdval(env, fdo);
+    int protections = 0;
+    int flags = 0;
+    if (prot == sun_nio_ch_FileChannelImpl_MAP_RO) {
+        protections = PROT_READ;
+        flags = MAP_SHARED;
+    } else if (prot == sun_nio_ch_FileChannelImpl_MAP_RW) {
+        protections = PROT_WRITE | PROT_READ;
+        flags = MAP_SHARED;
+    } else if (prot == sun_nio_ch_FileChannelImpl_MAP_PV) {
+        protections =  PROT_WRITE | PROT_READ;
+        flags = MAP_PRIVATE;
+    }
+    mapAddress = mmap64(
+        0,                    /* Let OS decide location */
+        len,                  /* Number of bytes to map */
+        protections,          /* File permissions */
+        flags,                /* Changes are shared */
+        fd,                   /* File descriptor of mapped file */
+        off);                 /* Offset into file */
+    if (mapAddress == MAP_FAILED) {
+        if (errno == ENOMEM) {
+            JNU_ThrowOutOfMemoryError(env, "Map failed");
+            return IOS_THROWN;
+        }
+        return handle(env, -1, "Map failed");
+    }
+    return ((jlong) (unsigned long) mapAddress);
+}
+
+
+JNIEXPORT jint JNICALL
+Java_sun_nio_ch_FileChannelImpl_unmap0(JNIEnv *env, jobject this,
+                                       jlong address, jlong len)
+{
+    void *a = (void *)jlong_to_ptr(address);
+    return handle(env,
+                  munmap(a, (size_t)len),
+                  "Unmap failed");
 }
 </code></pre>
 
