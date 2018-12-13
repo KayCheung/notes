@@ -30,4 +30,13 @@ output {
 		}
 	}
 }
+
+output {
+  elasticsearch {
+    hosts => ["http://localhost:9200"]
+    index => "pointmall"
+    #user => "elastic"
+    #password => "changeme"
+  }
+}
 </pre>
