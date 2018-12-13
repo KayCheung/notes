@@ -11,7 +11,7 @@ input {
 filter {
 	if [fields][appid] == "pointmall" {
 		grok {
-			match => {"message" => "(?&lt;logtime&gt;([0-9]{4}\-[0-9]{2}\-[0-9]{2}\s+[0-9]{2}:[0-9]{2}:[0-9]{2}+\.+[0-9]{3})) \[(?<thread>.*)\] %{LOGLEVEL:logLevel}  %{NOTSPACE:logger} - %{GREEDYDATA:msginfo}"}
+			match => {"message" => "(?&lt;logtime&gt;([0-9]{4}\-[0-9]{2}\-[0-9]{2}\s+[0-9]{2}:[0-9]{2}:[0-9]{2}+\.+[0-9]{3})) \[(?&lt;thread&gt;.*)\] %{LOGLEVEL:logLevel}  %{NOTSPACE:logger} - %{GREEDYDATA:msginfo}"}
 		}
 		date {
 			match => ["logtime", "yyyy-MM-dd HH:mm:ss.SSS"]
