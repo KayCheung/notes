@@ -7,6 +7,7 @@ input {
 
 
 # 14:06:15.757 [main] INFO  s.d.s.w.r.o.CachingOperationNameGenerator - Generating unique operation named: getListUsingPOST_2
+# 自定义：(?&lt;属性名称&gt;正则表达式)
 filter {
 	if [fields][appid] == "pointmall" {
 		grok {
