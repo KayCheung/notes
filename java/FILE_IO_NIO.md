@@ -54,7 +54,7 @@ readSingle(JNIEnv *env, jobject this, jfieldID fid) {
     } else if (nread == -1) { /* error */
         JNU_ThrowIOExceptionWithLastError(env, "Read error");
     }
-    return ret & 0xFF;<font color="read">//<i>转int,高24位取0, 后8位保持原样</i></font>
+    return ret & 0xFF;<font color="read">//<i>因为char是1个字节8位，所以转int,高24位取0, 后8位保持原样</i></font>
 }
 
 <font color="read">//<i>读取字节数组</i></font>
