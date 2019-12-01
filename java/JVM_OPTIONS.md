@@ -162,6 +162,7 @@
 -XX:+UseGCOverheadLimit|				|限制GC的运行时间。如果GC耗时过长，就抛OutOfMemoryError。(Java1.6引入)
 -XX:+UseCompressedOops|					|使用compressed pointers。这个参数默认在64bit的环境下默认启动，但是如果JVM的内存达到32G后，这个参数就会默认为不启动，因为32G内存后，压缩就没有多大必要了，要管理那么大的内存指针也需要很大的宽度了
 -XX:-UseLargePages|						|用大内存分页。(调整内存页的方法和性能提升原理，详见(http://www.oracle.com/technetwork/java/javase/tech/largememory-jsp-137182.html)关联选项：-XX:LargePageSizeInBytes=4m)
+-XX:ParGCCardsPerStrideChunk|256			|old gen如果引用了young gen中的对象，那么young gen在GC时就不能被回收，在HotSpot实现中，提供了一种叫CardTable的数据结构，用来表示一块内存区域，一般是512字节，如果这块内存中有对象引用了young gen对象，那么就标识这个CardTable为Dirty的，这样在内存扫描时，只需要扫描标识为Dirty的内存区域中的对象即可，避免了全old gen的扫描，大大提升了扫描效率。在ParNew算法中，扫描old gen的CardTable由多个线程完成，其中ParGCCardsPerStrideChunk参数就是每个线程处理的CardTable数量，默认是256个，意思每个线程每次处理大小为 256*512byte = 128K的StrideChunk，如果old gen大小4G，那么一共要处理 4G / 128K = 32K个StrideChunk，这么多的StrideChunk要分配给GC线程，假设有4个线程在并发执行，必然存在任务的调度和分配问题，影响到扫描效率。参考：https://www.jianshu.com/p/3b1e33e0ccaf
 
 
 ##### 9. 垃圾收集信息/内存使用情况
