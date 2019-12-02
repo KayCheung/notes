@@ -81,6 +81,8 @@
 -XX:AllocatePrefetchDistance|n			|为对象分配设置预取距离。（默认值取决于当前JVM 设置）
 -XX:+AlwaysPreTouch|					|在JVM 初始化时预先对Java堆进行摸底。
 -XX:InitialTenuringThreshold|7			|设置初始的对象在新生代中最大存活次数。
+-XX:+UseTLAB|                                                   |启用线程本地缓存区(Thread Local), Java1.4.2以前和使用-client选项时：默认关闭其余版本默认启用
+ 95 -XX:+ResizeTLAB|                                        |自动调整TLAB的大小
 
 
 ##### 4. 栈
@@ -91,8 +93,6 @@
 ----|------|----
 -Xss|									|设置线程堆栈空间大小。JDK5.0以后每个线程堆栈大小为1M，以前每个线程堆栈大小为256K。根据应用的线程所需内存大小进行调整。在相同物理内存下，减小这个值能生成更多的线程。但是操作系统对一个进程内的线程数还是有限制的，不能无限生成，经验值在3000~5000左右。
 -XX:ThreadStackSize|					|与Xss一样，0代表使用默认值，不能带单位
--XX:+UseTLAB|							|启用线程本地缓存区(Thread Local), Java1.4.2以前和使用-client选项时：默认关闭其余版本默认启用
--XX:+ResizeTLAB|					|自动调整TLAB的大小
 
 
 ##### 5. 非堆
