@@ -150,9 +150,12 @@
 -XX:+CMSParallelRemarkEnabled|			|降低标记停顿
 -XX:+UseAdaptiveSizePolicy|				|自动选择新生代区大小和相应的Survivor区比例(设置此选项后，并行收集器会自动选择新生代区大小和相应的Survivor区比例，以达到目标系统规定的最低相应时间或者收集频率等，此值建议使用并行收集器时，一直打开)
 -XX:-DisableExplicitGC|					|禁止在运行期显式地调用 System.gc(),开启该选项后,GC的触发时机将由Garbage Collector全权掌控, 这个参数需要严格的测试.(注意：你熟悉的代码里没调用System.gc()，不代表你依赖的框架工具没在使用。例如RMI就在多数用户毫不知情的情况下，显示地调用GC来防止自身OOM。请仔细权衡禁用带来的影响。)
+-XX:-ExplicitGCInvokesConcurrent   
+-XX:-ExplicitGCInvokesConcurrentAndUnloadsClasses|false|CMS下执行System.gc()走background模式是否收集元数据。
 -XX:+CollectGen0First|					|FullGC时是否先YGC
 -XX:GCTimeRatio|						|设置垃圾回收时间占程序运行时间的百分比(公式为1/(1+n))
 -XX:+ScavengeBeforeFullGC|				|在Full GC 前触发一次 Minor GC
+-XX:-CMSScavengeBeforeRemark|false			|如果标记阶段暂停时间较长，可以启用这个参数，在标记执行之前，先执行一次ygc。因为这个阶段，年轻代也是cms的GCRoot，cms会扫描年轻代指向老年代对象的引用，如果年轻代有大量引用需要被扫描，会让标记阶段耗时增加。
 -XX:ConcGCThreads|n						|Number of threads concurrent garbage collectors will use. The default value varies with the platform on which the JVM is running.
 -XX:-UseG1GC|							|使用G1垃圾处理器
 -XX:G1ReservePercent|10					|设置保留,用来做假天花板以减少晋升（新生代对象晋升到老生代）失败可能性的堆数目。
