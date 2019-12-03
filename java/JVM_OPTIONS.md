@@ -150,8 +150,7 @@
 -XX:+CMSParallelRemarkEnabled|			|降低标记停顿
 -XX:+UseAdaptiveSizePolicy|				|自动选择新生代区大小和相应的Survivor区比例(设置此选项后，并行收集器会自动选择新生代区大小和相应的Survivor区比例，以达到目标系统规定的最低相应时间或者收集频率等，此值建议使用并行收集器时，一直打开)
 -XX:-DisableExplicitGC|					|禁止在运行期显式地调用 System.gc(),开启该选项后,GC的触发时机将由Garbage Collector全权掌控, 这个参数需要严格的测试.(注意：你熟悉的代码里没调用System.gc()，不代表你依赖的框架工具没在使用。例如RMI就在多数用户毫不知情的情况下，显示地调用GC来防止自身OOM。请仔细权衡禁用带来的影响。)
--XX:-ExplicitGCInvokesConcurrent   
--XX:-ExplicitGCInvokesConcurrentAndUnloadsClasses|false|CMS下执行System.gc()走background模式是否收集元数据。
+-XX:-ExplicitGCInvokesConcurrent/-XX:-ExplicitGCInvokesConcurrentAndUnloadsClasses|false|CMS下执行System.gc()走background模式是否收集元数据。
 -XX:+CollectGen0First|					|FullGC时是否先YGC
 -XX:GCTimeRatio|						|设置垃圾回收时间占程序运行时间的百分比(公式为1/(1+n))
 -XX:+ScavengeBeforeFullGC|				|在Full GC 前触发一次 Minor GC
